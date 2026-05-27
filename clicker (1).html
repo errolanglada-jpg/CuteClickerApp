@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Clicker</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: -apple-system, 'Helvetica Neue', Arial, sans-serif;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2.5rem 1.25rem;
+    background: #fdf6ee;
+    background-image:
+      radial-gradient(circle at 15% 20%, #fde8c8 0%, transparent 45%),
+      radial-gradient(circle at 85% 80%, #d8f0e8 0%, transparent 45%),
+      radial-gradient(circle at 75% 10%, #fcd8d8 0%, transparent 35%);
+  }
+
+  .app {
+    width: 100%;
+    max-width: 420px;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  .app-title {
+    text-align: center;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: #c2a98a;
+  }
+
+  .counter-card {
+    background: rgba(255,255,255,0.92);
+    border: 1.5px solid rgba(255,255,255,0.95);
+    border-radius: 24px;
+    padding: 1.75rem 1.75rem 1.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.04), 0 8px 24px rgba(0,0,0,0.08);
+  }
+
+  .card-top {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .card-dot {
+    width: 11px;
+    height: 11px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .dot-a { background: #f5a97a; }
+  .dot-b { background: #7ac8a5; }
+
+  .card-label { flex: 1; }
+  .card-label input {
+    width: 100%;
+    font-family: -apple-system, 'Helvetica Neue', Arial, sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    background: transparent;
+    border: none;
+    border-bottom: 2px dashed #e8ddd2;
+    padding: 3px 0;
+    color: #4a3f35;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .card-label input:focus { border-bottom-color: #c2a98a; }
+  .card-label input::placeholder { color: #d4c4b5; font-weight: 600; }
+
+  .count-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 0 0.25rem;
+  }
+
+  .count-num {
+    font-size: 72px;
+    font-weight: 800;
+    text-align: center;
+    flex: 1;
+    line-height: 1;
+    color: #3d3228;
+    letter-spacing: -0.02em;
+    transition: transform 0.12s, color 0.2s;
+  }
+  .count-num.bump { transform: scale(1.18); }
+  .count-num.negative { color: #d97b6c; }
+
+  .btn-circle {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    border: none;
+    font-size: 38px;
+    font-weight: 300;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    user-select: none;
+    line-height: 1;
+    -webkit-tap-highlight-color: transparent;
+    transition: transform 0.15s, box-shadow 0.15s;
+  }
+  .btn-circle:active { transform: scale(0.92); }
+
+  .btn-plus {
+    background: linear-gradient(145deg, #6ed4ab, #4bbf94);
+    color: #fff;
+    box-shadow: 0 4px 14px rgba(75,191,148,0.40);
+  }
+  .btn-minus {
+    background: linear-gradient(145deg, #f5a97a, #ee8a5a);
+    color: #fff;
+    box-shadow: 0 4px 14px rgba(238,138,90,0.38);
+  }
+
+  .card-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 0.5rem;
+    border-top: 1.5px dashed #f0e8de;
+  }
+
+  .count-label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #c2a98a;
+  }
+
+  .reset-btn {
+    font-family: -apple-system, 'Helvetica Neue', Arial, sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    color: #c2a98a;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px 10px;
+    border-radius: 20px;
+    transition: background 0.15s, color 0.15s;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .reset-btn:active { background: #f5ece2; color: #a07d5e; }
+
+  @media (prefers-color-scheme: dark) {
+    body {
+      background: #1e1a16;
+      background-image:
+        radial-gradient(circle at 15% 20%, rgba(90,60,20,0.4) 0%, transparent 45%),
+        radial-gradient(circle at 85% 80%, rgba(20,70,50,0.4) 0%, transparent 45%),
+        radial-gradient(circle at 75% 10%, rgba(90,30,30,0.3) 0%, transparent 35%);
+    }
+    .counter-card {
+      background: rgba(42,36,30,0.95);
+      border-color: rgba(80,65,50,0.5);
+      box-shadow: 0 2px 4px rgba(0,0,0,0.2), 0 8px 24px rgba(0,0,0,0.3);
+    }
+    .card-label input { color: #f0e4d4; border-bottom-color: #4a3f32; }
+    .card-label input:focus { border-bottom-color: #8a7060; }
+    .card-label input::placeholder { color: #5a4d40; }
+    .count-num { color: #f0e4d4; }
+    .count-num.negative { color: #f5a97a; }
+    .count-label { color: #6a5a4a; }
+    .card-footer { border-top-color: #3a3028; }
+    .reset-btn { color: #6a5a4a; }
+    .reset-btn:active { background: #2e2520; color: #9a806a; }
+    .app-title { color: #6a5a4a; }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="app-title">My Counters</div>
+
+  <!-- Card 1 -->
+  <div class="counter-card">
+    <div class="card-top">
+      <div class="card-dot dot-a"></div>
+      <div class="card-label">
+        <input type="text" placeholder="What are you counting?" maxlength="40" />
+      </div>
+    </div>
+    <div class="count-row">
+      <button class="btn-circle btn-minus" id="minus-0">&#8722;</button>
+      <div class="count-num" id="num-0">0</div>
+      <button class="btn-circle btn-plus" id="plus-0">+</button>
+    </div>
+    <div class="card-footer">
+      <span class="count-label">count</span>
+      <button class="reset-btn" id="reset-0">&#8634; reset</button>
+    </div>
+  </div>
+
+  <!-- Card 2 -->
+  <div class="counter-card">
+    <div class="card-top">
+      <div class="card-dot dot-b"></div>
+      <div class="card-label">
+        <input type="text" placeholder="And this one&#8230;" maxlength="40" />
+      </div>
+    </div>
+    <div class="count-row">
+      <button class="btn-circle btn-minus" id="minus-1">&#8722;</button>
+      <div class="count-num" id="num-1">0</div>
+      <button class="btn-circle btn-plus" id="plus-1">+</button>
+    </div>
+    <div class="card-footer">
+      <span class="count-label">count</span>
+      <button class="reset-btn" id="reset-1">&#8634; reset</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  var counts = [
+    parseInt(localStorage.getItem('count-0')) || 0,
+    parseInt(localStorage.getItem('count-1')) || 0
+  ];
+
+  // Restore labels
+  for (var j = 0; j < 2; j++) {
+    var saved = localStorage.getItem('label-' + j);
+    if (saved) {
+      document.querySelectorAll('.card-label input')[j].value = saved;
+    }
+  }
+
+  // Restore counts on screen
+  for (var k = 0; k < 2; k++) {
+    var el = document.getElementById('num-' + k);
+    el.textContent = counts[k];
+    if (counts[k] < 0) { el.classList.add('negative'); }
+  }
+
+  // Save label on input
+  document.querySelectorAll('.card-label input').forEach(function(inp, idx) {
+    inp.addEventListener('input', function() {
+      localStorage.setItem('label-' + idx, inp.value);
+    });
+  });
+
+  function bump(el) {
+    el.classList.add('bump');
+    setTimeout(function() { el.classList.remove('bump'); }, 140);
+  }
+
+  function setCount(i, val) {
+    counts[i] = val;
+    localStorage.setItem('count-' + i, val);
+    var el = document.getElementById('num-' + i);
+    el.textContent = val;
+    if (val < 0) { el.classList.add('negative'); } else { el.classList.remove('negative'); }
+    bump(el);
+  }
+
+  for (var i = 0; i < 2; i++) {
+    (function(idx) {
+      document.getElementById('plus-'  + idx).addEventListener('touchend', function(e) { e.preventDefault(); setCount(idx, counts[idx] + 1); });
+      document.getElementById('minus-' + idx).addEventListener('touchend', function(e) { e.preventDefault(); setCount(idx, counts[idx] - 1); });
+      document.getElementById('reset-' + idx).addEventListener('touchend', function(e) { e.preventDefault(); setCount(idx, 0); });
+      document.getElementById('plus-'  + idx).addEventListener('click', function() { setCount(idx, counts[idx] + 1); });
+      document.getElementById('minus-' + idx).addEventListener('click', function() { setCount(idx, counts[idx] - 1); });
+      document.getElementById('reset-' + idx).addEventListener('click', function() { setCount(idx, 0); });
+    })(i);
+  }
+</script>
+</body>
+</html>
