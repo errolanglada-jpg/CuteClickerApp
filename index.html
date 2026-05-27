@@ -234,7 +234,32 @@
 </div>
 
 <script>
-  var counts = [0, 0];
+  var counts = [
+    parseInt(localStorage.getItem('count-0')) || 0,
+    parseInt(localStorage.getItem('count-1')) || 0
+  ];
+
+  // Restore labels
+  for (var j = 0; j < 2; j++) {
+    var saved = localStorage.getItem('label-' + j);
+    if (saved) {
+      document.querySelectorAll('.card-label input')[j].value = saved;
+    }
+  }
+
+  // Restore counts on screen
+  for (var k = 0; k < 2; k++) {
+    var el = document.getElementById('num-' + k);
+    el.textContent = counts[k];
+    if (counts[k] < 0) { el.classList.add('negative'); }
+  }
+
+  // Save label on input
+  document.querySelectorAll('.card-label input').forEach(function(inp, idx) {
+    inp.addEventListener('input', function() {
+      localStorage.setItem('label-' + idx, inp.value);
+    });
+  });
 
   function bump(el) {
     el.classList.add('bump');
@@ -243,6 +268,7 @@
 
   function setCount(i, val) {
     counts[i] = val;
+    localStorage.setItem('count-' + i, val);
     var el = document.getElementById('num-' + i);
     el.textContent = val;
     if (val < 0) { el.classList.add('negative'); } else { el.classList.remove('negative'); }
